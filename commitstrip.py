@@ -38,36 +38,38 @@ parser.add_argument("outputdir", help="Specify the output directory")
 parser.add_argument("-v", "--verbosity",
                     help="Print download url", action="store_true")
 parser.add_argument("-ps", "--pagestart", help="Specify starting page number")
-parser.add_argument("-pe", "--pageend", help="Sprcify ending page number")
+parser.add_argument("-pe", "--pageend", help="Specify ending page number")
 args = parser.parse_args()
 if args.language not in ["en", "fr"]:
     print "Language should be either en or fr"
     sys.exit()
-baseurl = "http://www.commitstrip.com/" + args.language + "/page/"
-pagestart = 1
-pageend = 100
+baseUrl = "http://www.commitstrip.com/" + args.language + "/page/"
+pageStart = 1
+pageEnd = 100
 if args.pagestart:
-    pagestart = int(args.pagestart)
+    pageStart = int(args.pagestart)
 if args.pageend:
-    pageend = int(args.pageend)
+    pageEnd = int(args.pageend)
 if not os.path.exists(args.outputdir):
     os.mkdir(args.outputdir)
-for pagecount in range(pagestart, pageend + 1):
+for pageCount in range(pageStart, pageEnd + 1):
     try:
-        page = baseurl + str(pagecount)
+        page = baseUrl + str(pageCount)
         test = lxml.html.parse(page)
-        imageUrlset = test.xpath(
-            '//img[contains(@class, "size-full")]/@src')
-        imageurl = imageUrlset[0]
-        indexpos = imageurl[::-1].index('/')
-        filename = imageurl[-indexpos:]
-        if os.path.isfile(args.outputdir + "/" + filename):
-            continue
-        if args.verbosity:
-            print "Page #" + str(pagecount) + "     : " + imageurl
-        imageurl = encodeurl(imageurl)
-        urllib.urlretrieve(
-            imageurl,
-            filename=args.outputdir + "/" + filename)
+        stripPages = test.xpath('//div/section/a/@href')
+        for stripPage in stripPages:
+            test = lxml.html.parse(stripPage)
+            stripPages = test.xpath('//img[contains(@class, "size-full")]/@src')
+            imageUrl = stripPages[0]
+            index = imageUrl[::-1].index('/')
+            filename = imageUrl[-index:]
+            if os.path.isfile(args.outputdir + "/" + filename):
+                continue
+            if args.verbosity:
+                print "Page #" + str(pageCount) + "     : " + imageUrl
+            imageUrl = encodeurl(imageUrl)
+            urllib.urlretrieve(
+                imageUrl,
+                filename=args.outputdir + "/" + filename)
     except:
         continue
