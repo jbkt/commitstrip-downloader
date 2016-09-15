@@ -61,9 +61,9 @@ for pageCount in range(pageStart, pageEnd + 1):
             test = lxml.html.parse(stripPage)
             stripPages = test.xpath('//img[contains(@class, "size-full")]/@src')
             imageUrl = stripPages[0]
-            uploads = "uploads/"
-            index = imageUrl.index(uploads) + len(uploads)
-            filename = imageUrl[index:].replace('/', '-')
+            language = '/' + args.language + '/'
+            index = stripPage.index(language) + len(language)
+            filename = stripPage[index:-1].replace('/', '-') + ".jpg"
             if os.path.isfile(args.outputdir + "/" + filename):
                 continue
             if args.verbosity:
